@@ -1,0 +1,3 @@
+[submodule "chessbik"]
+	path = chessbik
+	url = https://github.com/necromfox/chessbik
