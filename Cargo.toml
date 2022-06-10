@@ -5,4 +5,15 @@ edition = "2021"
 build = "build.rs"
 
 [dependencies]
+actix = "*"
 actix-web = "*"
+actix-web-actors = "*"
+actix-cors = "*"
+actix-files = "*"
+futures-util = "*"
+dashmap = "*"
+serde_json = "*"
+chrono = "*"
+rand = "*"
+chessbik-board = { git = "https://github.com/necromfox/chessbik-board" }
+chessbik-commons = { git = "https://github.com/necromfox/chessbik-commons" }

@@ -1,4 +1,4 @@
-use std::{process::Command, path::Path};
+use std::{io::ErrorKind, path::Path, process::Command};
 
 fn main() {
     Command::new("cargo")
@@ -6,42 +6,71 @@ fn main() {
         .arg("build")
         .arg("--release")
         .arg("--target=wasm32-unknown-unknown")
-        .status().unwrap();
+        .status()
+        .unwrap();
+
+    if let Err(err) = std::fs::create_dir(
+        Path::new("./target/")
+            .join(std::env::var("PROFILE").unwrap())
+            .join("static"),
+    ) {
+        if err.kind() != ErrorKind::AlreadyExists {
+            panic!("failure creating static dir");
+        }
+    }
 
     Command::new("wasm-bindgen")
-        .arg(format!("--out-dir=./target/{}/", std::env::var("PROFILE").unwrap()))
+        .arg(format!(
+            "--out-dir=./target/{}/static",
+            std::env::var("PROFILE").unwrap()
+        ))
         .arg("--target=web")
         .arg("./chessbik/target/wasm32-unknown-unknown/release/chessbik.wasm")
-        .status().unwrap();
+        .status()
+        .unwrap();
 
     for f in std::fs::read_dir("./www/").unwrap() {
         let f = f.unwrap().path();
 
-        std::fs::copy(
-            f.clone(), 
+        if let Err(err) = std::fs::copy(
+            f.clone(),
             Path::new("./target/")
                 .join(std::env::var("PROFILE").unwrap())
-                .join(f.file_name().unwrap())
-        ).unwrap();
+                .join("static")
+                .join(f.file_name().unwrap()),
+        ) {
+            if err.kind() != ErrorKind::AlreadyExists {
+                panic!("failure copying files");
+            }
+        }
     }
 
-    std::fs::create_dir(
+    if let Err(err) = std::fs::create_dir(
         Path::new("./target/")
             .join(std::env::var("PROFILE").unwrap())
-            .join("assets")
-    ).unwrap();
+            .join("static/assets"),
+    ) {
+        if err.kind() != ErrorKind::AlreadyExists {
+            panic!("failure creating assets dir");
+        }
+    }
 
     for f in std::fs::read_dir("./chessbik/assets").unwrap() {
         let f = f.unwrap().path();
 
-        std::fs::copy(
-            f.clone(), 
+        if let Err(err) = std::fs::copy(
+            f.clone(),
             Path::new("./target/")
                 .join(std::env::var("PROFILE").unwrap())
-                .join("assets")
-                .join(f.file_name().unwrap())
-        ).unwrap();
+                .join("static/assets")
+                .join(f.file_name().unwrap()),
+        ) {
+            if err.kind() != ErrorKind::AlreadyExists {
+                panic!("failure copying files");
+            }
+        }
     }
 
     println!("cargo:rerun-if-changed=build.rs");
+    println!("cargo:rerun-if-changed=chessbik/");
 }
