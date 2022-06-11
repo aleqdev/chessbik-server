@@ -1,19 +1,44 @@
 use std::env;
 
+use actix::{Actor, Addr, Recipient};
 use actix_files::Files;
-use actix_web::{middleware, web, App, Error, HttpRequest, HttpResponse, HttpServer};
+use actix_web::{
+    middleware,
+    web::{self, Data},
+    App, Error, HttpRequest, HttpResponse, HttpServer,
+};
 use actix_web_actors::ws;
+use chessbik_commons::WsMessage;
+use data_server::DataServer;
+use websocket::InternalWsMessage;
 
-mod data;
+pub(crate) mod data;
+mod data_server;
 mod websocket;
+
+pub fn send_to_recip(message: WsMessage, recip: &Recipient<InternalWsMessage>) {
+    match serde_json::to_string(&message) {
+        Ok(str) => {
+            recip.do_send(InternalWsMessage(str));
+        }
+        Err(err) => {
+            println!("error: failed to serialize message:\n{}", err);
+        }
+    }
+}
 
 async fn ws(
     req: HttpRequest,
     stream: web::Payload,
-    data: data::DataTy,
+    srv: Data<Addr<DataServer>>,
 ) -> Result<HttpResponse, Error> {
-    let resp = ws::start(websocket::Ws { data }, &req, stream);
-    resp
+    println!("{:?}", req.connection_info());
+    if let Some(addr) = req.connection_info().peer_addr() {
+        let resp = ws::start(websocket::Ws::new(srv.as_ref().clone(), addr), &req, stream);
+        resp
+    } else {
+        Ok(HttpResponse::Ok().finish())
+    }
 }
 
 #[actix_web::main]
@@ -26,7 +51,7 @@ async fn main() -> std::io::Result<()> {
         .parse()
         .expect("PORT must be a number");
 
-    let data = data::ChessbikData::new_actix();
+    let data = DataServer::start_default();
 
     HttpServer::new(move || {
         App::new()
@@ -43,7 +68,7 @@ async fn main() -> std::io::Result<()> {
                     res
                 })
             })
-            .app_data(data.clone())
+            .app_data(Data::new(data.clone()))
             .route("/ws", web::get().to(ws))
             .service(Files::new("/", "./static/"))
             .service(Files::new("/assets/", "./static/assets/"))

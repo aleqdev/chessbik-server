@@ -409,7 +409,7 @@ dependencies = [
 [[package]]
 name = "chessbik-commons"
 version = "0.1.0"
-source = "git+https://github.com/necromfox/chessbik-commons#20458309a6420a6bcfde5ded926dbbe8c9851548"
+source = "git+https://github.com/necromfox/chessbik-commons#68835995e33fd8ac130bc55325684dad95e55407"
 dependencies = [
  "chessbik-board",
  "chessbik-derive-wrapper",
@@ -439,6 +439,7 @@ dependencies = [
  "dashmap",
  "futures-util",
  "rand",
+ "serde",
  "serde_json",
 ]
 
