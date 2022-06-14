@@ -15,6 +15,7 @@ use websocket::InternalWsMessage;
 pub(crate) mod data;
 mod data_server;
 mod websocket;
+mod routes;
 
 pub fn send_to_recip(message: WsMessage, recip: &Recipient<InternalWsMessage>) {
     match serde_json::to_string(&message) {
@@ -60,6 +61,9 @@ async fn main() -> std::io::Result<()> {
                     .add(("Cross-Origin-Opener-Policy", "same-origin"))
                     .add(("Cross-Origin-Embedder-Policy", "require-corp")),
             )
+            .wrap(
+                middleware::Compress::default()
+            )
             .wrap_fn(|req, srv| {
                 srv.call(req).map(|mut res| {
                     if let Ok(ref mut res) = res {
@@ -70,7 +74,11 @@ async fn main() -> std::io::Result<()> {
             })
             .app_data(Data::new(data.clone()))
             .route("/ws", web::get().to(ws))
-            .service(Files::new("/", "./static/"))
+            .route("/", web::get().to(routes::index_html))
+            .route("/index.html", web::get().to(routes::index_html))
+            .route("/chessbik.js", web::get().to(routes::chessbik_js))
+            .route("/chessbik_bg.wasm", web::get().to(routes::chessbik_bg_wasm))
+            .service(Files::new("/snippets", "./static/snippets"))
             .service(Files::new("/assets/", "./static/assets/"))
     })
     .bind(("0.0.0.0", port))?

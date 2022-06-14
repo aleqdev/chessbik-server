@@ -1,6 +1,8 @@
 use actix::{Actor, Addr, AsyncContext, Handler, Message, StreamHandler};
 use actix_web_actors::ws::{self, WebsocketContext};
 use chessbik_commons::WsMessage;
+use std::time::Duration;
+
 
 use crate::data_server::*;
 
@@ -35,6 +37,12 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for Ws {
             }
             _ => (),
         }
+    }
+
+    fn started(&mut self, ctx: &mut Self::Context) {
+        ctx.run_interval(Duration::from_secs_f32(20.), |_, ctx| {
+            crate::send_to_recip(WsMessage::Hb, &ctx.address().recipient());
+        });
     }
 }
 
@@ -122,13 +130,22 @@ impl Ws {
                     name
                 ));
             }
+            WsMessage::RequestMakeMove(lobby, color, token, mvpair) => {
+                self.data.do_send(RequestMakeMove (
+                    lobby,
+                    color,
+                    token,
+                    mvpair
+                ));
+            }
 
             WsMessage::RequestBoardCallback(_)
             | WsMessage::RequestPlayerTokenCallback(_)
             | WsMessage::RequestPlayersCallback(_)
             | WsMessage::ConsiderRequestingBoard
             | WsMessage::ConsiderRequestingPlayers
-            | WsMessage::ConsiderSubscription(_) => {
+            | WsMessage::ConsiderSubscription(_)
+            | WsMessage::Hb => {
                 println!("info: got unexpected ws message, ignoring:\n{:?}", message)
             }
         }
