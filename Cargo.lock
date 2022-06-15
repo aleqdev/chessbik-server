@@ -399,7 +399,7 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 [[package]]
 name = "chessbik-board"
 version = "0.1.0"
-source = "git+https://github.com/necromfox/chessbik-board#399e58e489296e225d0698d634dceb394137e1ed"
+source = "git+https://github.com/necromfox/chessbik-board#afe30bf1ee0c7ad4956eba8ade9fa286e7bb840f"
 dependencies = [
  "chessbik-derive-wrapper",
  "derive_more",

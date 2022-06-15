@@ -56,12 +56,12 @@ impl DataServer {
                 board.at_mut(from).piece = None;
             }
             PieceMove::Rotation(rot) => {
-                let pairs = chessbik_board::cube_rotations_field::get_positions(&rot);
+                let pairs = chessbik_board::cube_rotations_field::get_positions(rot);
 
-                let new_board = board.clone();
+                let mut new_board = board.clone();
 
-                for pair in pairs {
-                    new_board[pair[1]] = board[pair[0]];
+                for (&from, &to) in pairs[0].iter().zip(pairs[1].iter()) {
+                    *new_board.at_mut(to) = *board.at(from);
                 }
 
                 *board = new_board;
