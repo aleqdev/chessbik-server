@@ -29,7 +29,7 @@ impl Handler<RequestMakeMove> for DataServer {
                         .iter()
                         .any(|m| *m == mv) {
                         
-                        Self::apply_move_unchecked(&mut game.board, mvpair);
+                        game.board.apply_move_unchecked(mvpair.mv, Some(mvpair.from));
 
                         game.notify_subscribers(WsMessage::ConsiderRequestingBoard);
                     }

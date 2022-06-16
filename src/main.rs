@@ -33,8 +33,7 @@ async fn ws(
     stream: web::Payload,
     srv: Data<Addr<DataServer>>,
 ) -> Result<HttpResponse, Error> {
-    println!("{:?}", req.connection_info());
-    if let Some(addr) = req.connection_info().peer_addr() {
+    if let Some(addr) = req.connection_info().realip_remote_addr() {
         let resp = ws::start(websocket::Ws::new(srv.as_ref().clone(), addr), &req, stream);
         resp
     } else {
