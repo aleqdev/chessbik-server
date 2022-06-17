@@ -22,14 +22,14 @@ impl Handler<RequestGameUnsubscriptionMessage> for DataServer {
 
             let mut should_notify = false;
 
-            if let Player::Opponent(ref token, _) = game.players.white {
+            if let Player::Opponent { ref token, .. } = game.players.white {
                 if *token == r_token {
                     game.players.white = Player::None;
                     should_notify = true;
                 }
             }
 
-            if let Player::Opponent(ref token, _) = game.players.black {
+            if let Player::Opponent { ref token, .. } = game.players.black {
                 if *token == r_token {
                     game.players.black = Player::None;
                     should_notify = true;

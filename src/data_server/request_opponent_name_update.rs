@@ -24,8 +24,8 @@ impl Handler<RequestOpponentNameUpdateMessage> for DataServer {
     ) -> Self::Result {
         if let Some(mut game) = self.with_game(lobby) {
             match game.players.playing(color) {
-                Player::None | Player::Engine(..) => (),
-                Player::Opponent(token, name) => {
+                Player::None | Player::Engine { .. } => (),
+                Player::Opponent { token, name } => {
                     if *token == r_token {
                         *name = r_name;
                         game.notify_subscribers(WsMessage::ConsiderRequestingPlayers);

@@ -1,10 +1,20 @@
+use actix::Addr;
 use chessbik_commons::{OpponentName, PlayerToken};
 
-#[derive(serde::Serialize, serde::Deserialize, Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+use crate::engine_actor::EngineActor;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Player {
     None,
-    Engine(PlayerToken),
-    Opponent(PlayerToken, OpponentName),
+    Engine {
+        token: PlayerToken,
+        owner: PlayerToken,
+        actor: Addr<EngineActor>,
+    },
+    Opponent {
+        token: PlayerToken,
+        name: OpponentName,
+    },
 }
 
 impl Default for Player {

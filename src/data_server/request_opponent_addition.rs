@@ -24,7 +24,7 @@ impl Handler<RequestOpponentAdditionMessage> for DataServer {
     ) -> Self::Result {
         if let Some(mut game) = self.with_game(lobby) {
             if let Player::None = game.players.playing(color) {
-                *game.players.playing(color) = Player::Opponent(token, name);
+                *game.players.playing(color) = Player::Opponent { token, name };
                 game.notify_subscribers(WsMessage::ConsiderRequestingPlayers);
             }
         }

@@ -21,21 +21,25 @@ impl Handler<RequestPlayersMessage> for DataServer {
             let record = PlayersRecord {
                 white: match &game.players.white {
                     Player::None => PlayerRecord::None,
-                    Player::Engine(token) => PlayerRecord::Engine((r_token == *token).into()),
-                    Player::Opponent(token, name) => {
+                    Player::Engine { owner, .. } => {
+                        PlayerRecord::Engine((r_token == *owner).into())
+                    }
+                    Player::Opponent { token, name } => {
                         PlayerRecord::Opponent(name.clone(), (r_token == *token).into())
                     }
                 },
                 black: match &game.players.black {
                     Player::None => PlayerRecord::None,
-                    Player::Engine(token) => PlayerRecord::Engine((r_token == *token).into()),
-                    Player::Opponent(token, name) => {
+                    Player::Engine { owner, .. } => {
+                        PlayerRecord::Engine((r_token == *owner).into())
+                    }
+                    Player::Opponent { token, name } => {
                         PlayerRecord::Opponent(name.clone(), (r_token == *token).into())
                     }
                 },
             };
 
-            crate::send_to_recip(WsMessage::RequestPlayersCallback(record), &recip);
+            recip.do_send(InternalWsMessage(WsMessage::RequestPlayersCallback(record)));
         }
     }
 }

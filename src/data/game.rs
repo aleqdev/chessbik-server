@@ -31,7 +31,7 @@ impl Game {
 
     pub fn notify_subscribers(&self, event: WsMessage) {
         for s in self.subscribers.values() {
-            crate::send_to_recip(event.clone(), s);
+            s.do_send(InternalWsMessage(event.clone()));
         }
     }
 }

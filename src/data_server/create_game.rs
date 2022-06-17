@@ -30,6 +30,6 @@ impl Handler<CreateGameMessage> for DataServer {
 
         self.games.insert(lobby.clone(), Game::new(Utc::now()));
 
-        crate::send_to_recip(WsMessage::ConsiderSubscription(lobby), &recip)
+        recip.do_send(InternalWsMessage(WsMessage::ConsiderSubscription(lobby)));
     }
 }

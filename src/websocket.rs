@@ -3,12 +3,11 @@ use actix_web_actors::ws::{self, WebsocketContext};
 use chessbik_commons::WsMessage;
 use std::time::Duration;
 
-
 use crate::data_server::*;
 
-#[derive(Message)]
+#[derive(Message, Debug)]
 #[rtype(result = "()")]
-pub struct InternalWsMessage(pub String);
+pub struct InternalWsMessage(pub WsMessage);
 
 pub struct Ws {
     pub data: Addr<DataServer>,
@@ -23,7 +22,14 @@ impl Handler<InternalWsMessage> for Ws {
     type Result = ();
 
     fn handle(&mut self, msg: InternalWsMessage, ctx: &mut Self::Context) -> Self::Result {
-        ctx.text(msg.0);
+        match serde_json::to_string(&msg.0) {
+            Ok(str) => {
+                ctx.text(str);
+            }
+            Err(err) => {
+                println!("error: failed to serialize message:\n{}", err);
+            }
+        }
     }
 }
 
@@ -32,7 +38,6 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for Ws {
         match msg {
             Ok(ws::Message::Ping(msg)) => ctx.pong(&msg),
             Ok(ws::Message::Text(text)) => {
-                println!("got message:\n{}\n", text);
                 self.handle_ws_text(text, ctx);
             }
             _ => (),
@@ -40,8 +45,8 @@ impl StreamHandler<Result<ws::Message, ws::ProtocolError>> for Ws {
     }
 
     fn started(&mut self, ctx: &mut Self::Context) {
-        ctx.run_interval(Duration::from_secs_f32(20.), |_, ctx| {
-            crate::send_to_recip(WsMessage::Hb, &ctx.address().recipient());
+        ctx.run_interval(Duration::from_secs_f32(20.), |slf, ctx| {
+            actix::Handler::handle(slf, InternalWsMessage(WsMessage::Hb), ctx);
         });
     }
 }
@@ -75,68 +80,40 @@ impl Ws {
                 self.data.do_send(RequestBoardMessage(lobby, recip));
             }
             WsMessage::RequestPlayerToken => {
-                self.data.do_send(RequestPlayerTokenMessage(
-                    self.addr.clone(),
-                    recip
-                ));
+                self.data
+                    .do_send(RequestPlayerTokenMessage(self.addr.clone(), recip));
             }
             WsMessage::RequestOpponentAddition(lobby, color, token, name) => {
-                self.data.do_send(RequestOpponentAdditionMessage(
-                    lobby,
-                    color,
-                    token,
-                    name
-                ));
+                self.data
+                    .do_send(RequestOpponentAdditionMessage(lobby, color, token, name));
             }
             WsMessage::RequestEngineAddition(lobby, color, token) => {
-                self.data.do_send(RequestEngineAdditionMessage(
-                    lobby,
-                    color,
-                    token,
-                ));
+                self.data
+                    .do_send(RequestEngineAdditionMessage(lobby, color, token));
             }
             WsMessage::RequestPlayerRemoval(lobby, color, token) => {
-                self.data.do_send(RequestPlayerRemovalMessage(
-                    lobby,
-                    color,
-                    token
-                ));
+                self.data
+                    .do_send(RequestPlayerRemovalMessage(lobby, color, token));
             }
             WsMessage::RequestGameSubscription(lobby, token) => {
-                self.data.do_send(RequestGameSubscriptionMessage(
-                    lobby,
-                    token,
-                    recip
-                ));
+                self.data
+                    .do_send(RequestGameSubscriptionMessage(lobby, token, recip));
             }
             WsMessage::RequestGameUnsubscription(lobby, token) => {
-                self.data.do_send(RequestGameUnsubscriptionMessage(
-                    lobby,
-                    token,
-                ));
+                self.data
+                    .do_send(RequestGameUnsubscriptionMessage(lobby, token));
             }
             WsMessage::RequestPlayers(lobby, token) => {
-                self.data.do_send(RequestPlayersMessage (
-                    lobby,
-                    token,
-                    recip
-                ));
+                self.data
+                    .do_send(RequestPlayersMessage(lobby, token, recip));
             }
             WsMessage::RequestPlayerNameUpdate(lobby, color, token, name) => {
-                self.data.do_send(RequestOpponentNameUpdateMessage (
-                    lobby,
-                    color,
-                    token,
-                    name
-                ));
+                self.data
+                    .do_send(RequestOpponentNameUpdateMessage(lobby, color, token, name));
             }
             WsMessage::RequestMakeMove(lobby, color, token, mvpair) => {
-                self.data.do_send(RequestMakeMove (
-                    lobby,
-                    color,
-                    token,
-                    mvpair
-                ));
+                self.data
+                    .do_send(RequestMakeMoveMessage(lobby, color, token, mvpair));
             }
 
             WsMessage::RequestBoardCallback(_)

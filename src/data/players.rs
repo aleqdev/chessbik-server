@@ -2,9 +2,7 @@ use chessbik_commons::PlayerColor;
 
 use super::Player;
 
-#[derive(
-    serde::Serialize, serde::Deserialize, Default, Debug, Clone, PartialEq, Eq, PartialOrd, Ord,
-)]
+#[derive(Default, Debug, Clone, PartialEq, Eq)]
 pub struct Players {
     pub white: Player,
     pub black: Player,

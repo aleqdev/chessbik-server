@@ -7,7 +7,11 @@ use super::DataServer;
 
 #[derive(Message)]
 #[rtype(result = "()")]
-pub struct RequestGameSubscriptionMessage(pub Lobby, pub PlayerToken, pub Recipient<InternalWsMessage>);
+pub struct RequestGameSubscriptionMessage(
+    pub Lobby,
+    pub PlayerToken,
+    pub Recipient<InternalWsMessage>,
+);
 
 impl Handler<RequestGameSubscriptionMessage> for DataServer {
     type Result = ();

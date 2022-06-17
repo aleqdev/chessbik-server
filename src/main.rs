@@ -1,6 +1,6 @@
 use std::env;
 
-use actix::{Actor, Addr, Recipient};
+use actix::{Actor, Addr};
 use actix_files::Files;
 use actix_web::{
     middleware,
@@ -8,25 +8,13 @@ use actix_web::{
     App, Error, HttpRequest, HttpResponse, HttpServer,
 };
 use actix_web_actors::ws;
-use chessbik_commons::WsMessage;
 use data_server::DataServer;
-use websocket::InternalWsMessage;
 
 pub(crate) mod data;
 mod data_server;
-mod websocket;
+mod engine_actor;
 mod routes;
-
-pub fn send_to_recip(message: WsMessage, recip: &Recipient<InternalWsMessage>) {
-    match serde_json::to_string(&message) {
-        Ok(str) => {
-            recip.do_send(InternalWsMessage(str));
-        }
-        Err(err) => {
-            println!("error: failed to serialize message:\n{}", err);
-        }
-    }
-}
+mod websocket;
 
 async fn ws(
     req: HttpRequest,
@@ -60,9 +48,7 @@ async fn main() -> std::io::Result<()> {
                     .add(("Cross-Origin-Opener-Policy", "same-origin"))
                     .add(("Cross-Origin-Embedder-Policy", "require-corp")),
             )
-            .wrap(
-                middleware::Compress::default()
-            )
+            .wrap(middleware::Compress::default())
             .wrap_fn(|req, srv| {
                 srv.call(req).map(|mut res| {
                     if let Ok(ref mut res) = res {

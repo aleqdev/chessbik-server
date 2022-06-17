@@ -20,9 +20,16 @@ impl Handler<RequestPlayerRemovalMessage> for DataServer {
         if let Some(mut game) = self.with_game(lobby) {
             match game.players.playing(color) {
                 Player::None => {}
-                Player::Engine(token) | Player::Opponent(token, _) => {
+                Player::Opponent { token, .. } => {
                     if *token == r_token {
                         *game.players.playing(color) = Player::None;
+                        game.notify_subscribers(WsMessage::ConsiderRequestingPlayers);
+                    }
+                }
+                Player::Engine { owner, .. } => {
+                    if *owner == r_token {
+                        *game.players.playing(color) = Player::None;
+                        //actor.
                         game.notify_subscribers(WsMessage::ConsiderRequestingPlayers);
                     }
                 }

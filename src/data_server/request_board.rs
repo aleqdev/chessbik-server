@@ -18,7 +18,9 @@ impl Handler<RequestBoardMessage> for DataServer {
         _: &mut Self::Context,
     ) -> Self::Result {
         if let Some(game) = self.with_game(lobby) {
-            crate::send_to_recip(WsMessage::RequestBoardCallback(game.board), &recip);
+            recip.do_send(InternalWsMessage(WsMessage::RequestBoardCallback(
+                game.board,
+            )));
         }
     }
 }

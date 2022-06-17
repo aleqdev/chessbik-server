@@ -36,6 +36,8 @@ impl Handler<RequestPlayerTokenMessage> for DataServer {
             }
         };
 
-        crate::send_to_recip(WsMessage::RequestPlayerTokenCallback(token), &recip);
+        recip.do_send(InternalWsMessage(WsMessage::RequestPlayerTokenCallback(
+            token,
+        )));
     }
 }
