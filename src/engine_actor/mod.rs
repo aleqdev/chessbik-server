@@ -206,11 +206,11 @@ pub fn get_best_eval_recursive(
                         b,
                     )));
 
-                    /*if e >= *b {
+                    if e >= *b {
                         break;
                     }
 
-                    *a = Eval(a.max(e.0));*/
+                    *a = Eval(a.max(e.0));
                 }
             }
 
@@ -239,11 +239,11 @@ pub fn get_best_eval_recursive(
                         b,
                     )));
 
-                    /*if e <= *a {
+                    if e <= *a {
                         break;
                     }
 
-                    *b = Eval(b.min(e.0));*/
+                    *b = Eval(b.min(e.0));
                 }
             }
 
