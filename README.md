@@ -12,4 +12,5 @@
 - gzip
 
 # IMPORTANT!
+When building, make sure to edit WS_URL file.
 When building, always explicitly specify target, since "cargo build --release" would fail to copy static assets.
