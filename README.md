@@ -2,7 +2,7 @@
 [Releases](https://github.com/necromfox/chessbik-server/releases)
 
 # running
-./chessbik-server (env PORT defaults to 3000)
+./chessbik-server (env CHESSBIK_SERVER_PORT defaults to 3000)
 
 # requirements to build
 - [rustup](https://www.rust-lang.org/tools/install)
