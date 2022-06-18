@@ -1,8 +1,9 @@
-use actix::{Actor, Context, Handler, Message};
+use actix::{Actor, Context, Handler, Message, AsyncContext};
 use chessbik_commons::{Lobby, PlayerToken};
+use chrono::{Duration, Utc};
 use dashmap::{mapref::one::RefMut, DashMap};
 
-use crate::data::Game;
+use crate::data::{Game, Player};
 
 mod create_game;
 mod game_subscription;
@@ -53,8 +54,6 @@ pub struct DataServer {
 
 impl DataServer {
     fn with_game(&self, lobby: Lobby) -> Option<RefMut<Lobby, Game>> {
-        use chrono::Utc;
-
         match self.games.get_mut(&lobby) {
             Some(mut game) => {
                 game.last_interaction = Utc::now();
@@ -67,6 +66,34 @@ impl DataServer {
 
 impl Actor for DataServer {
     type Context = Context<Self>;
+
+    fn started(&mut self, ctx: &mut Self::Context) {
+        ctx.run_interval(Duration::minutes(5).to_std().unwrap(), |slf, _| {
+            println!("Cleanup: {}", Utc::now());
+
+            let mut to_remove = vec!();
+
+            for game in slf.games.iter() {
+                if Utc::now() - game.last_interaction > Duration::hours(12) {
+                    let key = game.key().clone();
+                    println!("- Removed game: {key:?} (no interaction in 12 hours)");
+                    to_remove.push(key);
+                } else if game.subscribers.len() == 2 {
+                    if let Player::Engine { .. } = game.players.white {
+                        if let Player::Engine { .. } = game.players.black {
+                            let key = game.key().clone();
+                            println!("- Removed game: {key:?} (2 engines with no watchers)");
+                            to_remove.push(key);
+                        }
+                    }
+                }
+            }
+
+            for key in to_remove {
+                slf.games.remove(&key);
+            }
+        });
+    }
 }
 
 impl Handler<DataServerMessage> for DataServer {

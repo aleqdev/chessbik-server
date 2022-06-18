@@ -6,5 +6,37 @@
     </script>
 </head>
 <body>
+    <style>
+body {
+	background: linear-gradient(-45deg, #0c0b0b, #11070b, #000608, #030505);
+	background-size: 400% 400%;
+	animation: gradient 45s ease infinite;
+	height: 100vh;
+}
 
+@keyframes gradient {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
+}
+
+canvas {
+    position: absolute;
+    top:0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin:auto;
+}
+
+body {
+  overflow: hidden; /* Hide scrollbars */
+}
+    </style>
 </body>

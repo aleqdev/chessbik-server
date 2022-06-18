@@ -17,5 +17,6 @@ serde_json = "*"
 chrono = "*"
 rand = "*"
 mime = "*"
+humthreads = "*"
 chessbik-board = { git = "https://github.com/necromfox/chessbik-board" }
 chessbik-commons = { git = "https://github.com/necromfox/chessbik-commons" }
