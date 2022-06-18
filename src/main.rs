@@ -34,10 +34,11 @@ async fn main() -> std::io::Result<()> {
     use actix_web::dev::Service;
     use futures_util::FutureExt;
 
-    let port = env::var("PORT")
+    let port = env::var("CHESSBICK_SERVER_PORT")
+        .or(env::var("PORT"))
         .unwrap_or_else(|_| "3000".to_string())
         .parse()
-        .expect("PORT must be a number");
+        .expect("CHESSBICK_SERVER_PORT must be a number");
 
     let data = DataServer::start_default();
 

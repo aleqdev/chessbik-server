@@ -1,7 +1,10 @@
 use std::{io::ErrorKind, path::PathBuf, process::Command};
 
 fn main() {
+    let ws_url = std::fs::read_to_string("./WS_URL").expect("failed to read /WS_URL");
+
     Command::new("cargo")
+        .env("WS_URL", ws_url)
         .current_dir("./chessbik")
         .arg("build")
         .arg("--release")
