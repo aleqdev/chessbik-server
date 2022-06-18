@@ -1,6 +1,9 @@
 # chessbik-server
 [Releases](https://github.com/necromfox/chessbik-server/releases)
 
+# running
+./chessbik-server (env PORT defaults to 3000)
+
 # requirements to build
 - [rustup](https://www.rust-lang.org/tools/install)
 - wasm32-unknown-unknown (run "rustup target add wasm32-unknown-unknown")
